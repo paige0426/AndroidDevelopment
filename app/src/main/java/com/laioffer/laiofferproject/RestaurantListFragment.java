@@ -2,6 +2,7 @@ package com.laioffer.laiofferproject;
 
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -58,7 +59,7 @@ public class RestaurantListFragment extends Fragment {
     private Clock clock;
     private Fragment mfragment;
     private final String recommendation = "http://fengdemeng.mooo.com:8080/Dashi/recommendation?user_id=";
-    private final String search = "http://fengdemeng.mooo.com:8080/Dashi/restaurants?user_id=1111&lon=-122.06&lat=36.99";
+    private final String search = "http://fengdemeng.mooo.com:8080/Dashi/restaurants?user_id=";
     private final String history = "http://fengdemeng.mooo.com:8080/Dashi/history?user_id=";
     private double lon = -122.06;
     private double lat = 36.99;
@@ -68,6 +69,7 @@ public class RestaurantListFragment extends Fragment {
     private TextView textView;
     private DrawerLayout drawerLayout;
     private ListView functionList;
+    private RestaurantListFragment listFragment;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,7 +77,7 @@ public class RestaurantListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
         listView = (ListView) view.findViewById(R.id.restaurant_list);
-
+        listFragment = this;
         // Set a listener to ListView.
         mfragment = this;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -102,7 +104,7 @@ public class RestaurantListFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 switch(i) {
                     case 0:
-                        updateRestaurant(search);
+                        updateRestaurant(search + Config.user_name + "&lon=" + lon + "&lat=" + lat);
                         textView.setText("Search Nearby");
                         break;
                     case 1:
@@ -155,6 +157,55 @@ public class RestaurantListFragment extends Fragment {
         // Add the request to the RequestQueue.
         queue.add(stringRequest2);
     }
+
+    public void addDeleteFavorite(final String businessId, boolean isVisited) {
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        String url = "http://fengdemeng.mooo.com:8080/Dashi/history";
+        int method = isVisited ? Request.Method.DELETE : Request.Method.POST;
+        StringRequest stringRequest = new StringRequest(method, url, new Response.Listener<String>(){
+
+            @Override
+            public void onResponse(String response) {
+                Log.e("Life", "Test Response");
+                try {
+                    JSONObject json = new JSONObject(response);
+                    String result = json.getString("status");
+                    Log.e("Life", response);
+                    if (result.equals("OK")) {
+                        Toast.makeText(mfragment.getActivity(), "Success", Toast.LENGTH_LONG);
+                    } else {
+                        Toast.makeText(mfragment.getActivity(), result, Toast.LENGTH_LONG);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener(){
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(mfragment.getActivity(), error.toString(), Toast.LENGTH_LONG);
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> body = new HashMap<String, String>();
+                body.put("user_id", Config.user_name);
+                body.put("visited", businessId);
+                return body;
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Cookie", Config.cookies);
+                Log.e("Life", "HeadTest");
+                return headers;
+            }
+        };
+        queue.add(stringRequest);
+    }
+
 
     private String[] getRestaurantNames() {
         String[] names = {
@@ -234,6 +285,7 @@ public class RestaurantListFragment extends Fragment {
                     }
                     restaurant.setCategories(cat);
                     restaurant.setVisited(item.getBoolean("is_visited"));
+                    restaurant.setBusinessId(item.getString("business_id"));
                     restaurantList.add(restaurant);
                 }
             } catch (JSONException ex) {
@@ -250,7 +302,7 @@ public class RestaurantListFragment extends Fragment {
             Log.e("Latency", Long.toString(clock.getCurrentInterval()));
             if (restaurants != null) {
                 super.onPostExecute(restaurants);
-                RestaurantAdapter adapter = new RestaurantAdapter(fragment.getActivity(), restaurants);
+                RestaurantAdapter adapter = new RestaurantAdapter(fragment.getActivity(), restaurants, listFragment);
                 listView.setAdapter(adapter);
             } else {
                 Toast.makeText(fragment.getActivity(), "Data service error.", Toast.LENGTH_LONG);

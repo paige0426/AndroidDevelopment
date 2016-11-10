@@ -22,14 +22,7 @@ public class Restaurant {
     private List<String> categories;
     private double stars;
     private boolean isVisited;
-
-    public Bitmap getThumbnail() {
-        return thumbnail;
-    }
-
-    public Bitmap getRating() {
-        return rating;
-    }
+    private String businessId;
 
 
     /**
@@ -37,7 +30,7 @@ public class Restaurant {
      *
      * @param name name of the restaurant
      */
-    public Restaurant(String name, String address, String type, double lat, double lng, Bitmap thumbnail, Bitmap rating, boolean isVisited) {
+    public Restaurant(String name, String address, String type, double lat, double lng, Bitmap thumbnail, Bitmap rating, boolean isVisited, String businessId) {
         this.name = name;
         this.address = address;
         this.type = type;
@@ -46,6 +39,7 @@ public class Restaurant {
         this.thumbnail = thumbnail;
         this.rating = rating;
         this.isVisited = isVisited;
+        this.businessId = businessId;
     }
 
     public Restaurant() {
@@ -129,5 +123,21 @@ public class Restaurant {
 
     public void setVisited(boolean visited) {
         isVisited = visited;
+    }
+
+    public String getBusinessId() {
+        return businessId;
+    }
+
+    public void setBusinessId(String businessId) {
+        this.businessId = businessId;
+    }
+
+    public Bitmap getThumbnail() {
+        return thumbnail;
+    }
+
+    public Bitmap getRating() {
+        return rating;
     }
 }

@@ -30,11 +30,13 @@ public class RestaurantAdapter extends BaseAdapter {
 
     Context context;
     List<Restaurant> restaurantData;
+    RestaurantListFragment listFragment;
 
 
-    public RestaurantAdapter(Context context, List<Restaurant> restaurantData) {
+    public RestaurantAdapter(Context context, List<Restaurant> restaurantData, RestaurantListFragment listFragment) {
         this.context = context;
         this.restaurantData = restaurantData;
+        this.listFragment = listFragment;
     }
 
 
@@ -92,11 +94,13 @@ public class RestaurantAdapter extends BaseAdapter {
 
         restaurantThumbnail.setImageBitmap(r.getThumbnail());
         //restaurantRating.setImageBitmap(r.getRating());
-        ratingBar.setRating((float)r.getStars());
+        ratingBar.setRating((float) r.getStars());
         setImageView(visited, r.isVisited());
+        final String businessId = r.getBusinessId();
         visited.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                listFragment.addDeleteFavorite(businessId, r.isVisited());
                 setImageView(visited, !r.isVisited());
                 r.setVisited(!r.isVisited());
             }
