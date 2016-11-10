@@ -61,6 +61,16 @@
             android:layout_below="@id/restaurant_address"
             android:textSize="13sp" />
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/presence_invisible"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/imageView"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp" />
+
 
     </RelativeLayout>
 </LinearLayout>

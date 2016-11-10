@@ -21,6 +21,7 @@ public class Restaurant {
     private Bitmap rating;
     private List<String> categories;
     private double stars;
+    private boolean isVisited;
 
     public Bitmap getThumbnail() {
         return thumbnail;
@@ -30,12 +31,13 @@ public class Restaurant {
         return rating;
     }
 
+
     /**
      * Constructor
      *
      * @param name name of the restaurant
      */
-    public Restaurant(String name, String address, String type, double lat, double lng, Bitmap thumbnail, Bitmap rating) {
+    public Restaurant(String name, String address, String type, double lat, double lng, Bitmap thumbnail, Bitmap rating, boolean isVisited) {
         this.name = name;
         this.address = address;
         this.type = type;
@@ -43,10 +45,10 @@ public class Restaurant {
         this.lng = lng;
         this.thumbnail = thumbnail;
         this.rating = rating;
-
+        this.isVisited = isVisited;
     }
 
-    public Restaurant(){
+    public Restaurant() {
     }
 
 
@@ -121,4 +123,11 @@ public class Restaurant {
         this.stars = stars;
     }
 
+    public boolean isVisited() {
+        return isVisited;
+    }
+
+    public void setVisited(boolean visited) {
+        isVisited = visited;
+    }
 }

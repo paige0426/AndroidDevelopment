@@ -3,20 +3,28 @@ package com.laioffer.laiofferproject;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import java.util.List;
 
 public class RestaurantListActivity extends AppCompatActivity implements RestaurantListFragment.OnItemSelectListener {
 
     RestaurantListFragment listFragment;
-    RestaurantGridFragment gridFragment;
+//    RestaurantGridFragment gridFragment;
+    ListView functionList;
+    ArrayAdapter<String> listAdapter;
+    String fragmentArray[] = {"Search Nearby", "My Favorites", "Recommendation"};
 
     @Override
     public void onItemSelected(int position) {
-        gridFragment.onItemSelected(position);
+        listFragment.onItemSelected(position);
 //        listFragment.onItemSelected(position);
     }
 
@@ -44,6 +52,10 @@ public class RestaurantListActivity extends AppCompatActivity implements Restaur
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, listFragment).commit();
         }
+        functionList = (ListView) findViewById(R.id.functionList);
+        listAdapter = new ArrayAdapter<String>(this, R.layout.font_layout, fragmentArray);
+        functionList.setAdapter(listAdapter);
+
 
  /*       if (!isTablet()) {
             listFragment = new RestaurantListFragment();

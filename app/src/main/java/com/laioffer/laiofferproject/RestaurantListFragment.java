@@ -1,12 +1,18 @@
 package com.laioffer.laiofferproject;
 
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import android.support.v4.app.Fragment;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -50,11 +57,17 @@ public class RestaurantListFragment extends Fragment {
     private DataService dataService;
     private Clock clock;
     private Fragment mfragment;
-    private final String recommendation =  "http://fengdemeng.mooo.com:8080/Dashi/recommendation?user_id=";
+    private final String recommendation = "http://fengdemeng.mooo.com:8080/Dashi/recommendation?user_id=";
     private final String search = "http://fengdemeng.mooo.com:8080/Dashi/restaurants?user_id=1111&lon=-122.06&lat=36.99";
     private final String history = "http://fengdemeng.mooo.com:8080/Dashi/history?user_id=";
     private double lon = -122.06;
     private double lat = 36.99;
+    private Context mContext;
+    private LocationManager lm;
+    private Location curLocation;
+    private TextView textView;
+    private DrawerLayout drawerLayout;
+    private ListView functionList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,19 +94,48 @@ public class RestaurantListFragment extends Fragment {
                 startActivity(intent);
             }
         });
-        dataService = new DataService(getActivity());
+        textView = (TextView) view.findViewById(R.id.labelName);
+        drawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawerView);
+        functionList = (ListView) getActivity().findViewById(R.id.functionList);
+        functionList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                switch(i) {
+                    case 0:
+                        updateRestaurant(search);
+                        textView.setText("Search Nearby");
+                        break;
+                    case 1:
+                        updateRestaurant(history + Config.user_name);
+                        textView.setText("My Favorites");
+                        break;
+                    case 2:
+                        updateRestaurant(recommendation + Config.user_name);
+                        textView.setText("Recommendation");
+                        break;
+                    default:
+                        break;
+                }
+                drawerLayout.closeDrawers();
+            }
+        });
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(functionList);
+            }
+        });
+        mContext = getActivity();
+        dataService = new DataService(mContext);
 //        refreshRestaurantList(dataService);
-        updateRestaurant(Config.user_name, recommendation);
-//        updateRestaurant(Config.user_name, history);
-//        updateRestaurant(Config.user_name, search);
+        updateRestaurant(recommendation + Config.user_name);
         return view;
 
     }
 
-    public void updateRestaurant(String user_id, String url) {
-        String url2 = url + user_id;
+    public void updateRestaurant(String url) {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
-        StringRequest stringRequest2 = new StringRequest(Request.Method.GET, url2, new Response.Listener<String>() {
+        StringRequest stringRequest2 = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 new GetRestaurantsNearbyAsyncTask(mfragment, response, dataService).execute();
@@ -124,6 +166,9 @@ public class RestaurantListFragment extends Fragment {
     }
 
     OnItemSelectListener mCallback;
+
+    public void onItemSelected(int position) {
+    }
 
 
     // Container Activity must implement this interface
@@ -188,6 +233,7 @@ public class RestaurantListFragment extends Fragment {
                         cat.add(category.get(j).toString());
                     }
                     restaurant.setCategories(cat);
+                    restaurant.setVisited(item.getBoolean("is_visited"));
                     restaurantList.add(restaurant);
                 }
             } catch (JSONException ex) {
@@ -210,6 +256,31 @@ public class RestaurantListFragment extends Fragment {
                 Toast.makeText(fragment.getActivity(), "Data service error.", Toast.LENGTH_LONG);
             }
         }
+    }
+
+    private void getLocation() {
+        if (lm == null) {
+            lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        }
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        boolean isValid = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        Log.e("Life", Boolean.toString(isValid));
+        curLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (curLocation != null) {
+            lat = curLocation.getLatitude();
+            lon = curLocation.getLongitude();
+        }
+        Log.e("Life", Double.toString(lat));
+        Log.e("Life", Double.toString(lon));
     }
 
 /*    public void onItemSelected(int position){

@@ -9,9 +9,10 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/labelName"
         android:gravity="center"
         android:background="#434343"
-        android:text="Restaurant Recommendation"
+        android:text="Recommendation"
         android:textColor="#F3BB43"
         android:textSize="28sp"
         android:padding="10dp" />
