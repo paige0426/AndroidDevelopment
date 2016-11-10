@@ -101,8 +101,9 @@ public class DataService {
                     // Download the image.
                     Bitmap thumbnail = getBitmapFromURL(business.getString("image_url"));
                     Bitmap rating = getBitmapFromURL(business.getString("rating_img_url"));
+                    boolean isVisited = business.getBoolean("is_visited");
                     restaurants.add(
-                            new Restaurant(name, address, type, lat, lng, thumbnail, rating));
+                            new Restaurant(name, address, type, lat, lng, thumbnail, rating, isVisited));
                 }
             }
             return restaurants;
