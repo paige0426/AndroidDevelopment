@@ -100,9 +100,10 @@ public class RestaurantAdapter extends BaseAdapter {
         visited.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listFragment.addDeleteFavorite(businessId, r.isVisited());
-                setImageView(visited, !r.isVisited());
+                listFragment.addDeleteJson(businessId, r.isVisited());
                 r.setVisited(!r.isVisited());
+                setImageView(visited, r.isVisited());
+
             }
         });
         return convertView;

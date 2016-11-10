@@ -31,6 +31,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,6 +40,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,16 +83,12 @@ public class RestaurantListFragment extends Fragment {
         // Set a listener to ListView.
         mfragment = this;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Restaurant r = (Restaurant) listView.getItemAtPosition(position);
                 // Prepare all the data we need to start map activity.
                 Bundle bundle = new Bundle();
-                bundle.putParcelable(
-                        RestaurantMapActivity.EXTRA_LATLNG,
-                        new LatLng(r.getLat(), r.getLng()));
+                bundle.putParcelable(RestaurantMapActivity.EXTRA_LATLNG, new LatLng(r.getLat(), r.getLng()));
                 Intent intent = new Intent(view.getContext(), RestaurantMapActivity.class);
                 intent.putExtras(bundle);
                 startActivity(intent);
@@ -99,10 +97,10 @@ public class RestaurantListFragment extends Fragment {
         textView = (TextView) view.findViewById(R.id.labelName);
         drawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawerView);
         functionList = (ListView) getActivity().findViewById(R.id.functionList);
-        functionList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        functionList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                switch(i) {
+                switch (i) {
                     case 0:
                         updateRestaurant(search + Config.user_name + "&lon=" + lon + "&lat=" + lat);
                         textView.setText("Search Nearby");
@@ -136,7 +134,7 @@ public class RestaurantListFragment extends Fragment {
     }
 
     public void updateRestaurant(String url) {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        RequestQueue queue = Volley.newRequestQueue(mContext);
         StringRequest stringRequest2 = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -158,19 +156,25 @@ public class RestaurantListFragment extends Fragment {
         queue.add(stringRequest2);
     }
 
-    public void addDeleteFavorite(final String businessId, boolean isVisited) {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
+    public void addDeleteJson(String businessId, boolean isVisited) {
+        RequestQueue queue = Volley.newRequestQueue(mContext);
         String url = "http://fengdemeng.mooo.com:8080/Dashi/history";
-        int method = isVisited ? Request.Method.DELETE : Request.Method.POST;
-        StringRequest stringRequest = new StringRequest(method, url, new Response.Listener<String>(){
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("user_id", Config.user_name);
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(businessId);
+            jsonObject.put("visited", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+        int method = isVisited ? Request.Method.DELETE : Request.Method.POST;
+        JsonObjectRequest jsonRequest = new JsonObjectRequest(method, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(String response) {
-                Log.e("Life", "Test Response");
+            public void onResponse(JSONObject response) {
                 try {
-                    JSONObject json = new JSONObject(response);
-                    String result = json.getString("status");
-                    Log.e("Life", response);
+                    String result = response.getString("status");
                     if (result.equals("OK")) {
                         Toast.makeText(mfragment.getActivity(), "Success", Toast.LENGTH_LONG);
                     } else {
@@ -180,7 +184,43 @@ public class RestaurantListFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener(){
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(mfragment.getActivity(), error.toString(), Toast.LENGTH_LONG);
+            }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Cookie", Config.cookies);
+                return headers;
+            }
+        };
+        queue.add(jsonRequest);
+    }
+
+    public void addDeleteFavorite(final String businessId, boolean isVisited) {
+        RequestQueue queue = Volley.newRequestQueue(mContext);
+        String url = "http://fengdemeng.mooo.com:8080/Dashi/history";
+        int method = isVisited ? Request.Method.DELETE : Request.Method.POST;
+        StringRequest stringRequest = new StringRequest(method, url, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject json = new JSONObject(response);
+                    String result = json.getString("status");
+                    if (result.equals("OK")) {
+                        Toast.makeText(mfragment.getActivity(), "Success", Toast.LENGTH_LONG);
+                    } else {
+                        Toast.makeText(mfragment.getActivity(), result, Toast.LENGTH_LONG);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -188,18 +228,31 @@ public class RestaurantListFragment extends Fragment {
             }
         }) {
             @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> body = new HashMap<String, String>();
-                body.put("user_id", Config.user_name);
-                body.put("visited", businessId);
-                return body;
+            public byte[] getBody() throws AuthFailureError {
+                JSONObject jsonObject = new JSONObject();
+                String body = null;
+                try {
+                    jsonObject.put("user_id", Config.user_name);
+                    JSONArray jsonArray = new JSONArray();
+                    jsonArray.put(businessId);
+                    jsonObject.put("visited", jsonArray);
+                    body = jsonObject.toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    return body.getBytes("utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                return null;
             }
+
 
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Cookie", Config.cookies);
-                Log.e("Life", "HeadTest");
                 return headers;
             }
         };
