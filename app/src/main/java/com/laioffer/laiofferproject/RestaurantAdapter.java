@@ -101,9 +101,9 @@ public class RestaurantAdapter extends BaseAdapter {
             @Override
             public void onClick(View view) {
                 listFragment.addDeleteJson(businessId, r.isVisited());
+                //listFragment.addDeleteFavorite(businessId, r.isVisited());
                 r.setVisited(!r.isVisited());
                 setImageView(visited, r.isVisited());
-
             }
         });
         return convertView;

@@ -5,10 +5,12 @@ import android.Manifest;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -31,15 +33,20 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -149,6 +156,7 @@ public class RestaurantListFragment extends Fragment {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Cookie", Config.cookies);
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
         };
@@ -157,9 +165,22 @@ public class RestaurantListFragment extends Fragment {
     }
 
     public void addDeleteJson(String businessId, boolean isVisited) {
-        RequestQueue queue = Volley.newRequestQueue(mContext);
+        /*..
+        Use OwnHttpClientStack to let delete carry body
+         */
+        String userAgent = "volley/0";
+        try {
+            String packageName = getContext().getPackageName();
+            PackageInfo info = getContext().getPackageManager().getPackageInfo(packageName, 0);
+            userAgent = packageName + "/" + info.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+
+        HttpStack httpStack = new OwnHttpClientStack(AndroidHttpClient.newInstance(userAgent));
+        RequestQueue queue = Volley.newRequestQueue(mContext, httpStack);
         String url = "http://fengdemeng.mooo.com:8080/Dashi/history";
         JSONObject jsonObject = new JSONObject();
+
         try {
             jsonObject.put("user_id", Config.user_name);
             JSONArray jsonArray = new JSONArray();
@@ -168,7 +189,6 @@ public class RestaurantListFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         int method = isVisited ? Request.Method.DELETE : Request.Method.POST;
         JsonObjectRequest jsonRequest = new JsonObjectRequest(method, url, jsonObject, new Response.Listener<JSONObject>() {
             @Override
@@ -194,6 +214,7 @@ public class RestaurantListFragment extends Fragment {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Cookie", Config.cookies);
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
         };
@@ -231,6 +252,7 @@ public class RestaurantListFragment extends Fragment {
             public byte[] getBody() throws AuthFailureError {
                 JSONObject jsonObject = new JSONObject();
                 String body = null;
+                Log.e("life", "get body");
                 try {
                     jsonObject.put("user_id", Config.user_name);
                     JSONArray jsonArray = new JSONArray();
@@ -253,6 +275,7 @@ public class RestaurantListFragment extends Fragment {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Cookie", Config.cookies);
+                headers.put("Content-Type", "application/json");
                 return headers;
             }
         };
