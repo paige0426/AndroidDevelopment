@@ -19,7 +19,7 @@
         android:layout_height="match_parent"
         android:id="@+id/functionList"
         android:layout_gravity="left"
-        android:background="@android:color/holo_orange_light" />
+        android:background="@color/common_plus_signin_btn_text_light_focused" />
 
 </android.support.v4.widget.DrawerLayout>
 

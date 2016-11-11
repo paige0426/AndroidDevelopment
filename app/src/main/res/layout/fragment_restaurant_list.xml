@@ -13,7 +13,7 @@
         android:gravity="center"
         android:background="#434343"
         android:text="Recommendation"
-        android:textColor="#F3BB43"
+        android:textColor="@android:color/white"
         android:textSize="28sp"
         android:padding="10dp" />
 

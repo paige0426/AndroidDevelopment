@@ -9,14 +9,14 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="450dp"
-        android:src="@drawable/restaurant"
+        android:layout_height="match_parent"
+        android:src="@drawable/restaurant3"
         android:scaleType="centerCrop" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#F3BB43"
+        android:background="@color/common_google_signin_btn_text_light_focused"
         android:orientation="vertical"
         android:layout_alignParentBottom="true">
 
@@ -28,7 +28,8 @@
             android:textSize="24sp"
             android:fontFamily="casual"
             android:paddingTop="5dp"
-            android:paddingLeft="10dp" />
+            android:paddingLeft="10dp"
+            android:textColor="@android:color/white" />
 
         <EditText
             android:id="@+id/editTextLogin"
@@ -36,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textSize="22sp"
-            android:paddingLeft="10dp" />
+            android:paddingLeft="10dp"
+            android:textColor="@android:color/white" />
 
 
         <TextView
@@ -45,7 +47,8 @@
             android:text="Password:"
             android:textSize="24sp"
             android:fontFamily="casual"
-            android:paddingLeft="10dp" />
+            android:paddingLeft="10dp"
+            android:textColor="@android:color/white" />
 
 
         <EditText
@@ -55,7 +58,8 @@
             android:layout_gravity="center_horizontal"
             android:inputType="textPassword"
             android:textSize="22sp"
-            android:paddingLeft="10dp" />
+            android:paddingLeft="10dp"
+            android:textColor="@android:color/white" />
 
 
         <Button
