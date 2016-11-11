@@ -1,15 +1,19 @@
 package com.laioffer.laiofferproject;
 
+import android.animation.Animator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -28,11 +32,14 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText editTextLogin;
     private EditText editTextPassword;
     private Button button;
+    private LinearLayout linearLayout;
+    private float origin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +59,23 @@ public class LoginActivity extends AppCompatActivity {
         editTextLogin = (EditText) findViewById(R.id.editTextLogin);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);
         button = (Button) findViewById(R.id.submit);
+        linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
+        origin = linearLayout.getTranslationY();
 
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                LoginAuthentification();
+            public void onClick(final View view) {
+                linearLayout.animate().setDuration(500).translationY(origin);
+                new CountDownTimer(500, 500) {
+                    @Override
+                    public void onTick(long l) {
+                    }
+                    @Override
+                    public void onFinish() {
+                        LoginAuthentification();
+                    }
+                }.start();
             }
         });
     }
@@ -100,6 +118,8 @@ public class LoginActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                linearLayout.animate().setDuration(500).translationY(0);
+                Toast.makeText(getBaseContext(), "Please reenter your account and password", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override
@@ -127,6 +147,26 @@ public class LoginActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
         return result;
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("Life cycle test", "We are at onStart()");
+        linearLayout.animate().setDuration(500).translationY(0);
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e("Life cycle test", "We are at onResume()");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("Life cycle test", "We are at onPause()");
     }
 
 }
