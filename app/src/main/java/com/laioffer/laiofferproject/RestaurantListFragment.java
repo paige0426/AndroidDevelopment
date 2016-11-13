@@ -133,6 +133,7 @@ public class RestaurantListFragment extends Fragment {
             }
         });
         mContext = getActivity();
+        getLocation();
         dataService = new DataService(mContext);
 //        refreshRestaurantList(dataService);
         updateRestaurant(recommendation + Config.user_name);
@@ -400,9 +401,9 @@ public class RestaurantListFragment extends Fragment {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        boolean isValid = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        boolean isValid = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         Log.e("Life", Boolean.toString(isValid));
-        curLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        curLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (curLocation != null) {
             lat = curLocation.getLatitude();
             lon = curLocation.getLongitude();
