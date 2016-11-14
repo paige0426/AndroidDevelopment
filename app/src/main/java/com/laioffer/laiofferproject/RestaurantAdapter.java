@@ -197,6 +197,8 @@ public class RestaurantAdapter extends BaseAdapter {
         holder.restaurantType.setText(r.getCategories().get(0));
         holder.restaurantThumbnail.setImageBitmap(r.getThumbnail());
         holder.ratingBar.setRating((float) r.getStars());
+        final LayerDrawable stars = (LayerDrawable) holder.ratingBar.getProgressDrawable();
+        stars.getDrawable(2).setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
         setImageView(holder.visited, r.isVisited());
         return convertView;
     }
